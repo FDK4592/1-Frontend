@@ -6,29 +6,59 @@ import * as GlobalStyles from '../../styles/GlobalStyles'
 import TextSemiBold from '../../components/TextSemibold'
 import { API_BASE_URL } from '@env'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
+import ImageCard from '../../components/ImageCard'
 
 export default function RestaurantsScreen({ navigation }) {
-  return (
-    <View style={styles.container}>
-      <TextRegular style={{ fontSize: 16, alignSelf: 'center', margin: 20 }}>Random Restaurant</TextRegular>
+  const [restaurants, setRestaurants] = useState([])
+  
+  // Se lanza useEffect justo despues de que cargue la pantalla 
+  // y cuando se modifica algún estado 
+  useEffect(() => {
+    console.log('Loading restaurants, please wait 2 seconds')
+    setTimeout(() => {
+      setRestaurants(getAll) // getAll function has to be imported
+      console.log('Restaurants loaded')
+    }, 2000)
+  }, [])
+/*
+  const renderRestaurant = ({ item }) => {
+    return (
       <Pressable
+        style={styles.row}
         onPress={() => {
-          navigation.navigate('RestaurantDetailScreen', { id: Math.floor(Math.random() * 100) })
-        }}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed
-              ? GlobalStyles.brandBlueTap
-              : GlobalStyles.brandBlue
-          },
-          styles.actionButton
-        ]}
-      >
-        <TextRegular textStyle={styles.text}>
-          Go to Random Restaurant Details
-        </TextRegular>
+          navigation.navigate('RestaurantDetailScreen', { id: item.id })
+        }}>
+          <TextRegular>
+              {item.name}
+          </TextRegular>
       </Pressable>
-    </View>
+    )
+  }
+*/
+  const renderRestaurantWithImageCard = ({ item }) => {
+    return (
+      <ImageCard
+        imageUri={item.logo ? { uri: API_BASE_URL + '/' + item.logo } : restaurantLogo}
+        title={item.name}
+        onPress={() => {
+          navigation.navigate('RestaurantDetailScreen', { id: item.id })
+        }}
+      >
+        <TextRegular numberOfLines={2}>{item.description}</TextRegular>
+        {item.averageServiceMinutes !== null &&
+          <TextSemiBold>Avg. service time: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.averageServiceMinutes} min.</TextSemiBold></TextSemiBold>
+        }
+        <TextSemiBold>Shipping: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.shippingCosts.toFixed(2)}€</TextSemiBold></TextSemiBold>
+      </ImageCard>
+    )
+  }
+  return (
+    <FlatList
+      style={styles.container}
+      data={restaurants}
+      renderItem={renderRestaurantWithImageCard}
+      keyExtractor={item => item.id.toString()}
+    />
   )
 }
 
